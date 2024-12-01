@@ -4,7 +4,8 @@ final case class Args(mode: String,
                       check: (String,Args) => Boolean,
                       exact: Boolean,
                       batchSize: Int,
-                      pattern: String)
+                      pattern: String,
+                      wordCount: Int)
 
 object Args {
 
@@ -20,6 +21,6 @@ object Args {
     else
       address.toLowerCase.endsWith(param.pattern.toLowerCase)
 
-  def apply(): Args = new Args("end", END, false, 1000, "")
+  def apply(): Args = new Args("end", END, false, 1000, "", 24)
 
 }

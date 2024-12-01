@@ -25,8 +25,9 @@ object Util {
 
   private val wordList = WordList.load("english").get
 
-  private def newMnemonic(): String = {
-    val entropy = scorex.utils.Random.randomBytes(128 / 8)
+  private def newMnemonic(wordCount: Int): String = {
+    val entropyBits = (wordCount * 32) / 3
+    val entropy = scorex.utils.Random.randomBytes(entropyBits / 8)
     val checksum = BitVector(scorex.crypto.hash.Sha256.hash(entropy))
     val entropyWithChecksum = BitVector(entropy) ++ checksum.take(entropy.length / 4)
     entropyWithChecksum.grouped(BitsGroupSize).map { wordIndex =>
@@ -45,7 +46,17 @@ object Util {
     ).getEncoded
 
   def randomAddress(): (String,String) = {
-    val mnemonic = newMnemonic()
+    val mnemonic = newMnemonic(24)
+    val addr = ErgoAddressEncoder.Mainnet.toString(
+      P2PKAddress(
+        deriveMasterKey(toSeed(mnemonic), usePre1627KeyDerivation = false).derive(eip3DerivationPath).publicImage
+      )(ErgoAddressEncoder.Mainnet)
+    )
+    mnemonic -> addr
+  }
+
+  def randomAddress(wordCount: Int): (String,String) = {
+    val mnemonic = newMnemonic(wordCount)
     val addr = ErgoAddressEncoder.Mainnet.toString(
       P2PKAddress(
         deriveMasterKey(toSeed(mnemonic), usePre1627KeyDerivation = false).derive(eip3DerivationPath).publicImage
@@ -80,6 +91,11 @@ object Util {
       .action((x, c) => c.copy(pattern = x))
       .text("pattern to look for in addresses")
       .required()
+    opt[Unit]("12words")
+      .abbr("w12")
+      .action((_, c) => c.copy(wordCount = 12))
+      .text("generate 12-word seed phrases (default is 24)")
+      .optional()
   }
 
 }

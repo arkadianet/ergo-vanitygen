@@ -18,13 +18,14 @@ object Main {
     val param: Args = parsedArgs.get
 
     println("Looking for addresses that " + param.mode + (if(param.exact) " exactly" else "") + " with \"" + param.pattern + "\"")
+    println(s"Using ${param.wordCount}-word seed phrases")
 
     var hits: ParArray[(String,String)] = null
     var i = 0
 
     do {
       hits = ParRange(0, param.batchSize, 1, inclusive = false)
-        .map(_ => randomAddress()).toParArray.filter(x => param.check(x._2, param))
+        .map(_ => randomAddress(param.wordCount)).toParArray.filter(x => param.check(x._2, param))
       i += 1
       println(s"Checked ${i * param.batchSize} addresses...")
     }while(hits.isEmpty)
