@@ -5,7 +5,6 @@ Usage: java -jar ergo-vanitygen-VERSION.jar [options]
 -s, --start              look for pattern at the start of addresses
 -e, --end                look for pattern at the end of addresses
 -m, --matchCase          match provided pattern with case sensitivity
--b, --batchSize [value]  the number of addresses to check at once in paralell, 1000 by default
 -p, --pattern [value]    pattern to look for in addresses
 --w12                    generate 12-word seed phrases (default is 24)
 </pre>

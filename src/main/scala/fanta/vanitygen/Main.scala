@@ -17,22 +17,27 @@ object Main {
 
     val param: Args = parsedArgs.get
 
-    println("Looking for addresses that " + param.mode + (if(param.exact) " exactly" else "") + " with \"" + param.pattern + "\"")
+    // Pre-compile pattern matching
+    val matcher = param.mode match {
+      case "start" => 
+        val pattern = if (param.exact) param.pattern else param.pattern.toLowerCase
+        (addr: String) => if (param.exact) addr.startsWith(pattern, 1) 
+                         else addr.toLowerCase.startsWith(pattern, 1)
+      case "end" =>
+        val pattern = if (param.exact) param.pattern else param.pattern.toLowerCase
+        (addr: String) => if (param.exact) addr.endsWith(pattern) 
+                         else addr.toLowerCase.endsWith(pattern)
+    }
+
+    println(s"""Looking for addresses that ${param.mode} ${if(param.exact) "exactly" else ""} with "${param.pattern}"""")
     println(s"Using ${param.wordCount}-word seed phrases")
 
-    var hits: ParArray[(String,String)] = null
-    var i = 0
-
-    do {
-      hits = ParRange(0, param.batchSize, 1, inclusive = false)
-        .map(_ => randomAddress(param.wordCount)).toParArray.filter(x => param.check(x._2, param))
-      i += 1
-      println(s"Checked ${i * param.batchSize} addresses...")
-    }while(hits.isEmpty)
-
-    println("Found " + hits.length + " addresses " + param.mode + "ing " + (if(param.exact) "exactly " else "") + "with \"" + param.pattern + "\"")
-
-    hits.toArray.zipWithIndex.foreach { case ((seed, addr), i) =>
+    val processor = new AddressProcessor()
+    val results = processor.findMatches(matcher, param.wordCount)
+    
+    println(s"""Found ${results.length} addresses ${param.mode}ing ${if(param.exact) "exactly " else ""}with "${param.pattern}"""")
+    
+    results.zipWithIndex.foreach { case ((seed, addr), i) =>
       println("---------------------------")
       println(s"Match ${i + 1}")
       println(s"Seed phrase: $seed")

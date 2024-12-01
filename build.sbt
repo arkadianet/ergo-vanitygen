@@ -12,7 +12,7 @@ resolvers ++= Seq(Resolver.mavenLocal, sonatypeReleases, sonatypeSnapshots, Reso
 libraryDependencies ++= Seq(
   "org.scorexfoundation" %% "sigma-state" % "5.0.5",
   "org.ergoplatform" %% "ergo-wallet" % "5.0.7",
-  "com.github.scopt" %% "scopt" % "4.1.0"
+  "com.github.scopt" %% "scopt" % "4.1.0",
 )
 
 Compile / compile / scalacOptions ++= Seq("-release", "8")
